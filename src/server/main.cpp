@@ -1,5 +1,6 @@
 #include "httplib.h"
 #include <iostream>
+#include "partition/partition_writer.h"
 
 
 void handle_hello(const httplib::Request& req, httplib::Response& res) {

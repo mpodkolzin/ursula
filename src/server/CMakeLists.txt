@@ -18,3 +18,4 @@ add_executable(ursula
 #target_link_libraries(main_exec PRIVATE wal)
 #target_link_libraries(main_exec PRIVATE io)
 target_link_libraries(ursula PRIVATE httplib::httplib)
+target_link_libraries(ursula PRIVATE partition)

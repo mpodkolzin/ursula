@@ -11,6 +11,7 @@
 class PartitionWriter {
 public:
     PartitionWriter(const std::string& directory, uint64_t base_offset);
+    ~PartitionWriter();
 
     uint64_t append(const std::vector<uint8_t>& message);
     void flush();
@@ -34,6 +35,9 @@ private:
     std::thread flush_thread_;
     std::mutex flush_mutex_;
     std::condition_variable flush_cv_;
+    std::atomic<bool> flush_requested_;
+    std::atomic<bool> running_;
+
 
     void open_segment_files();
     void write_message(uint64_t offset, const std::vector<uint8_t>& message);

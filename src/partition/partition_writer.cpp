@@ -11,9 +11,29 @@ PartitionWriter::PartitionWriter(const std::string& directory, uint64_t base_off
       base_offset_(base_offset),
       segment_size_limit_(128 * 1024 * 1024), // 128 MB
       buffer_flush_threshold_(64 * 1024),     // 64 KB buffer flush threshold
+      running_(true),
+      flush_requested_(false),
+      flush_interval_ms_(1000),
       bytes_written_in_segment_(0) {
     open_segment_files();
+
+    flush_thread_ = std::thread(&PartitionWriter::flush_loop, this);
 }
+
+PartitionWriter::~PartitionWriter() {
+    flush_cv_.notify_all();
+    if (flush_thread_.joinable()) {
+        flush_thread_.join();
+    }
+    flush();
+    if (log_file_) {
+        log_file_->close();
+    }
+    if (index_file_) {
+        index_file_->close();
+    }
+}
+
 
 void PartitionWriter::open_segment_files() {
     std::filesystem::create_directories(directory_);
@@ -34,7 +54,9 @@ uint64_t PartitionWriter::append(const std::vector<uint8_t>& message) {
     write_message(assigned_offset, message);
 
     if (log_buffer_.size() >= buffer_flush_threshold_) {
-        flush_buffers();
+        std::lock_guard<std::mutex> lock(flush_mutex_);
+        flush_requested_ = true;
+        flush_cv_.notify_one();
     }
 
     if (bytes_written_in_segment_ >= segment_size_limit_) {
@@ -43,6 +65,7 @@ uint64_t PartitionWriter::append(const std::vector<uint8_t>& message) {
 
     return assigned_offset;
 }
+
 
 void PartitionWriter::write_message(uint64_t offset, const std::vector<uint8_t>& message) {
     uint32_t message_size = static_cast<uint32_t>(message.size());
@@ -83,6 +106,22 @@ void PartitionWriter::flush_buffers() {
             throw std::runtime_error("Failed to flush index buffer");
         }
         index_buffer_.clear();
+    }
+}
+
+
+void PartitionWriter::flush_loop() {
+    while (running_) {
+        std::unique_lock<std::mutex> lock(flush_mutex_);
+        flush_cv_.wait(lock,
+         [this] { return flush_requested_ || !running_; });
+
+        if (!running_) {
+            break;
+        }
+
+        flush_buffers();
+        flush_requested_ = false;
     }
 }
 
