@@ -63,3 +63,15 @@ bool FileHandle::is_valid() const {
 int FileHandle::get_fd() const {
     return fd_;
 }
+
+void FileHandle::fsync() {
+    if (is_valid()) {
+        ::fsync(fd_);
+    }
+}
+
+void FileHandle::close_fd() {
+    if (is_valid()) {
+        ::close(fd_);
+    }
+}

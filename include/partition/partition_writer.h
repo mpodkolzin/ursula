@@ -38,6 +38,8 @@ private:
     std::atomic<bool> flush_requested_;
     std::atomic<bool> running_;
 
+    bool sync_on_flush_;
+
 
     void open_segment_files();
     void write_message(uint64_t offset, const std::vector<uint8_t>& message);

@@ -10,6 +10,7 @@ project(bifrost VERSION 0.1.0 LANGUAGES C CXX)
 #)
 
 add_subdirectory(server)
-#add_subdirectory(wal)
 add_subdirectory(io)
 add_subdirectory(partition)
+add_subdirectory(broker)
+add_subdirectory(metrics)

@@ -113,8 +113,9 @@ void PartitionWriter::flush_buffers() {
 void PartitionWriter::flush_loop() {
     while (running_) {
         std::unique_lock<std::mutex> lock(flush_mutex_);
-        flush_cv_.wait(lock,
-         [this] { return flush_requested_ || !running_; });
+        flush_cv_.wait_for(lock, 
+        std::chrono::milliseconds(flush_interval_ms_),
+        [this] { return flush_requested_ || !running_; });
 
         if (!running_) {
             break;
