@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <fcntl.h>
+#include "record/record.h"
+#include "spdlog/spdlog.h"
 
 PartitionReader::PartitionReader(const std::string& segment_dir)
     : segment_dir_(segment_dir)
@@ -31,10 +33,14 @@ uint32_t PartitionReader::find_log_position(uint64_t offset) {
     off_t index_size = std::filesystem::file_size(segment_dir_ + "/" + std::to_string(base_offset_) + ".index");
     size_t entry_count = index_size / entry_size;
 
+    spdlog::info("Looking for offset {}, relative {}, entries {}", offset, relative, entry_count);
+
+
     for (size_t i = 0; i < entry_count; ++i) {
         index_file_->seek(i * entry_size, SEEK_SET);
         index_file_->read(&ro, sizeof(ro));
         index_file_->read(&pos, sizeof(pos));
+        spdlog::info("Index entry {}: rel_offset={}, log_pos={}", i, ro, pos);
         if (ro == relative) {
             return pos;
         }
@@ -43,17 +49,17 @@ uint32_t PartitionReader::find_log_position(uint64_t offset) {
     throw std::runtime_error("Offset not found in index: " + std::to_string(offset));
 }
 
-std::vector<uint8_t> PartitionReader::read(uint64_t offset) {
+Record PartitionReader::read(uint64_t offset) {
     uint32_t log_pos = find_log_position(offset);
-
     log_file_->seek(log_pos, SEEK_SET);
-    uint32_t size;
-    log_file_->read(&size, sizeof(size));
 
-    std::vector<uint8_t> buffer(size);
-    if (size > 0) {
-        log_file_->read(buffer.data(), size);
+    std::vector<uint8_t> buffer(4096);
+    ssize_t bytes_read = log_file_->read(buffer.data(), buffer.size());
+    if (bytes_read <= 0) {
+        throw std::runtime_error("Failed to read from log file");
     }
 
-    return buffer;
+    buffer.resize(bytes_read);
+    size_t pos = 0;
+    return Record::deserialize(buffer, pos);
 }

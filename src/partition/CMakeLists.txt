@@ -6,3 +6,5 @@ add_library(partition STATIC
     )
 
 target_include_directories(partition PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+target_link_libraries(partition PRIVATE spdlog::spdlog)

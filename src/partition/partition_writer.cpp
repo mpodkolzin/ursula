@@ -4,6 +4,7 @@
 #include <unistd.h>     
 #include <cstring>      
 #include <stdexcept>
+#include "util/byteio.h"
 
 PartitionWriter::PartitionWriter(const std::string& directory, uint64_t base_offset)
     : directory_(directory),
@@ -21,6 +22,7 @@ PartitionWriter::PartitionWriter(const std::string& directory, uint64_t base_off
 }
 
 PartitionWriter::~PartitionWriter() {
+    running_ = false;
     flush_cv_.notify_all();
     if (flush_thread_.joinable()) {
         flush_thread_.join();
@@ -72,10 +74,9 @@ void PartitionWriter::write_record(uint64_t offset, const Record& record) {
     log_buffer_.insert(log_buffer_.end(), bytes.begin(), bytes.end());
 
     uint32_t relative_offset = static_cast<uint32_t>(offset - base_offset_);
-    const uint8_t* offset_ptr = reinterpret_cast<const uint8_t*>(&relative_offset);
-    const uint8_t* pos_ptr = reinterpret_cast<const uint8_t*>(&pos_in_log);
-    index_buffer_.insert(index_buffer_.end(), offset_ptr, offset_ptr + sizeof(relative_offset));
-    index_buffer_.insert(index_buffer_.end(), pos_ptr, pos_ptr + sizeof(pos_in_log));
+
+    write_u32(index_buffer_, relative_offset);
+    write_u32(index_buffer_, pos_in_log);
 
     bytes_written_in_segment_ += bytes.size();
 }

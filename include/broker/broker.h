@@ -11,7 +11,7 @@ public:
     explicit Broker(const std::string& data_dir);
 
     uint64_t produce(PartitionId pid, const Record& record);
-    //std::vector<uint8_t> consume(PartitionId pid, uint64_t offset);
+    Record consume(PartitionId pid, uint64_t offset);
     MetricsCollector& metrics() const;
 
     void flush();

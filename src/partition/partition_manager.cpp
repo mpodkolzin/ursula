@@ -23,7 +23,7 @@ uint64_t PartitionManager::append(PartitionId pid, const Record& record) {
     return writers_[pid]->append(record);
 }
 
-std::vector<uint8_t> PartitionManager::read(PartitionId pid, uint64_t offset) {
+Record PartitionManager::read(PartitionId pid, uint64_t offset) {
     std::lock_guard<std::mutex> lock(mutex_);
     create_partition_if_missing(pid);
     return readers_[pid]->read(offset);

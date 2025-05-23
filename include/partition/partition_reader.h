@@ -5,11 +5,11 @@
 #include <cstdint>
 #include <memory>
 #include "io/file_handle.h"
-
+#include "record/record.h"
 class PartitionReader {
 public:
     PartitionReader(const std::string& segment_dir);
-    std::vector<uint8_t> read(uint64_t offset);
+    Record read(uint64_t offset);
 
 private:
     uint64_t base_offset_;
