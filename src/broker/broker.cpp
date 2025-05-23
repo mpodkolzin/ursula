@@ -7,9 +7,9 @@ Broker::Broker(const std::string& data_dir) {
     metrics_collector_ = std::make_unique<MetricsCollector>();
 }
 
-uint64_t Broker::produce(PartitionId pid, const std::vector<uint8_t>& message) {
+uint64_t Broker::produce(PartitionId pid, const Record& record) {
     metrics_collector_->increment_produced();
-    return partition_manager_->append(pid, message);
+    return partition_manager_->append(pid, record);
 }
 
 //std::vector<uint8_t> Broker::consume(PartitionId pid, uint64_t offset) {

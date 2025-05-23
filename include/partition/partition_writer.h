@@ -7,13 +7,14 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "record/record.h"
 
 class PartitionWriter {
 public:
     PartitionWriter(const std::string& directory, uint64_t base_offset);
     ~PartitionWriter();
 
-    uint64_t append(const std::vector<uint8_t>& message);
+    uint64_t append(const Record& record);
     void flush();
     void roll_segment();
 
@@ -42,7 +43,7 @@ private:
 
 
     void open_segment_files();
-    void write_message(uint64_t offset, const std::vector<uint8_t>& message);
+    void write_record(uint64_t offset, const Record& message);
     void write_index_entry(uint32_t relative_offset, uint32_t position);
 
     void flush_buffers();

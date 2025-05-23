@@ -1,6 +1,6 @@
 #include <filesystem>
 #include "partition/partition_manager.h"
-
+#include "record/record.h"
 PartitionManager::PartitionManager(const std::string& data_dir)
     : data_dir_(data_dir) {}
 
@@ -12,22 +12,22 @@ void PartitionManager::create_partition_if_missing(PartitionId pid) {
         writers_[pid] = std::make_unique<PartitionWriter>(partition_dir, 0);
     }
 
-    //if (!readers_.contains(pid)) {
-    //    readers_[pid] = std::make_unique<PartitionReader>(partition_dir);
-    //}
+    if (!readers_.contains(pid)) {
+        readers_[pid] = std::make_unique<PartitionReader>(partition_dir);
+    }
 }
 
-uint64_t PartitionManager::append(PartitionId pid, const std::vector<uint8_t>& message) {
+uint64_t PartitionManager::append(PartitionId pid, const Record& record) {
     std::lock_guard<std::mutex> lock(mutex_);
     create_partition_if_missing(pid);
-    return writers_[pid]->append(message);
+    return writers_[pid]->append(record);
 }
 
-//std::vector<uint8_t> PartitionManager::read(PartitionId pid, uint64_t offset) {
-//    std::lock_guard<std::mutex> lock(mutex_);
-//    create_partition_if_missing(pid);
-//    return readers_[pid]->read(offset);
-//}
+std::vector<uint8_t> PartitionManager::read(PartitionId pid, uint64_t offset) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    create_partition_if_missing(pid);
+    return readers_[pid]->read(offset);
+}
 
 void PartitionManager::flush_all() {
     std::lock_guard<std::mutex> lock(mutex_);

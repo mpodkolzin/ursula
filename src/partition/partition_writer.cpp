@@ -47,11 +47,9 @@ void PartitionWriter::open_segment_files() {
     index_buffer_.clear();
 }
 
-uint64_t PartitionWriter::append(const std::vector<uint8_t>& message) {
-    uint64_t assigned_offset = next_offset_;
-    ++next_offset_;
-
-    write_message(assigned_offset, message);
+uint64_t PartitionWriter::append(const Record& record) {
+    uint64_t assigned_offset = next_offset_++;
+    write_record(assigned_offset, record);
 
     if (log_buffer_.size() >= buffer_flush_threshold_) {
         std::lock_guard<std::mutex> lock(flush_mutex_);
@@ -67,24 +65,19 @@ uint64_t PartitionWriter::append(const std::vector<uint8_t>& message) {
 }
 
 
-void PartitionWriter::write_message(uint64_t offset, const std::vector<uint8_t>& message) {
-    uint32_t message_size = static_cast<uint32_t>(message.size());
+void PartitionWriter::write_record(uint64_t offset, const Record& record) {
+    std::vector<uint8_t> bytes = record.serialize();
     uint32_t pos_in_log = static_cast<uint32_t>(log_file_->seek(0, SEEK_CUR)) + static_cast<uint32_t>(log_buffer_.size());
 
-    // Append [message_size][message] to log_buffer_
-    const uint8_t* size_ptr = reinterpret_cast<const uint8_t*>(&message_size);
-    log_buffer_.insert(log_buffer_.end(), size_ptr, size_ptr + sizeof(message_size));
-    log_buffer_.insert(log_buffer_.end(), message.begin(), message.end());
+    log_buffer_.insert(log_buffer_.end(), bytes.begin(), bytes.end());
 
-    // Append [relative_offset][position] to index_buffer_
     uint32_t relative_offset = static_cast<uint32_t>(offset - base_offset_);
     const uint8_t* offset_ptr = reinterpret_cast<const uint8_t*>(&relative_offset);
     const uint8_t* pos_ptr = reinterpret_cast<const uint8_t*>(&pos_in_log);
-
     index_buffer_.insert(index_buffer_.end(), offset_ptr, offset_ptr + sizeof(relative_offset));
     index_buffer_.insert(index_buffer_.end(), pos_ptr, pos_ptr + sizeof(pos_in_log));
 
-    bytes_written_in_segment_ += sizeof(message_size) + message.size();
+    bytes_written_in_segment_ += bytes.size();
 }
 
 void PartitionWriter::flush() {

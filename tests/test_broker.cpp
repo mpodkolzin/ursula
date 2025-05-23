@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include "broker/broker.h"
 #include <filesystem>
+#include "record/record.h"
 
 TEST_CASE("Broker basic produce and consume") {
     std::string test_dir = "./test_broker_data";
@@ -10,7 +11,8 @@ TEST_CASE("Broker basic produce and consume") {
     PartitionId pid = 0;
 
     std::vector<uint8_t> msg = {'h', 'e', 'l', 'l', 'o'};
-    uint64_t offset = broker.produce(pid, msg);
+    Record record(RecordType::DATA, msg);
+    uint64_t offset = broker.produce(pid, record);
     //auto result = broker.consume(pid, offset);
 
     //REQUIRE(result == msg);

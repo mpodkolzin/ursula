@@ -15,6 +15,8 @@ target_include_directories(test_broker PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(test_broker PRIVATE Catch2::Catch2WithMain)
 target_link_libraries(test_broker PRIVATE metrics)
 target_link_libraries(test_broker PRIVATE partition)
+target_link_libraries(test_broker PRIVATE record)
+target_link_libraries(test_broker PRIVATE util)
 target_link_libraries(test_broker PRIVATE io)
 target_link_libraries(test_broker PRIVATE broker)
 

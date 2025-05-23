@@ -26,6 +26,8 @@ add_executable(ursula
 # Link the 'wal' library (must be defined before in the build order)
 #target_link_libraries(main_exec PRIVATE wal)
 #target_link_libraries(main_exec PRIVATE io)
+target_link_libraries(ursula PRIVATE record)
+target_link_libraries(ursula PRIVATE util)
 target_link_libraries(ursula PRIVATE metrics)
 target_link_libraries(ursula PRIVATE partition)
 target_link_libraries(ursula PRIVATE io)
