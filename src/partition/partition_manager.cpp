@@ -4,17 +4,32 @@
 PartitionManager::PartitionManager(const std::string& data_dir)
     : data_dir_(data_dir) {}
 
-void PartitionManager::create_partition_if_missing(PartitionId pid) {
-    std::string partition_dir = data_dir_ + "/partition_" + std::to_string(pid);
-    std::filesystem::create_directories(partition_dir);
+//void PartitionManager::create_partition_if_missing(PartitionId pid) {
+//    std::string partition_dir = data_dir_ + "/partition_" + std::to_string(pid);
+//    std::filesystem::create_directories(partition_dir);
+//
+//    if (!writers_.contains(pid)) {
+//        writers_[pid] = std::make_unique<PartitionWriter>(partition_dir, 0);
+//    }
+//
+//    if (!readers_.contains(pid)) {
+//        readers_[pid] = std::make_unique<PartitionReader>(partition_dir);
+//    }
+//}
 
-    if (!writers_.contains(pid)) {
-        writers_[pid] = std::make_unique<PartitionWriter>(partition_dir, 0);
+void PartitionManager::maybe_init_topic(const std::string& topic) {
+    if (topics_.count(topic)) return;
+
+    TopicEntry entry;
+    for (size_t i = 0; i < default_partitions_; ++i) {
+        PartitionId pid = static_cast<PartitionId>(i);
+        std::string path = root_dir_ + "/" + topic + "/partition_" + std::to_string(pid);
+        std::filesystem::create_directories(path);
+        entry.writers[pid] = std::make_unique<PartitionWriter>(path);
+        entry.readers[pid] = std::make_unique<PartitionReader>(path);
     }
 
-    if (!readers_.contains(pid)) {
-        readers_[pid] = std::make_unique<PartitionReader>(partition_dir);
-    }
+    topics_[topic] = std::move(entry);
 }
 
 uint64_t PartitionManager::append(PartitionId pid, const Record& record) {

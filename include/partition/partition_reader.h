@@ -1,22 +1,17 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <cstdint>
+#include <map>
 #include <memory>
-#include "io/file_handle.h"
+#include <string>
+#include "partition/log_segment.h"
 #include "record/record.h"
+
 class PartitionReader {
 public:
-    PartitionReader(const std::string& segment_dir);
+    explicit PartitionReader(const std::map<uint64_t, std::unique_ptr<LogSegment>>& segments);
+
     Record read(uint64_t offset);
 
 private:
-    uint64_t base_offset_;
-    std::unique_ptr<FileHandle> log_file_;
-    std::unique_ptr<FileHandle> index_file_;
-
-    std::string segment_dir_;
-
-    uint32_t find_log_position(uint64_t offset);
+    const std::map<uint64_t, std::unique_ptr<LogSegment>>& segments_;
 };

@@ -9,17 +9,17 @@ TEST_CASE("Broker basic produce and consume") {
     std::filesystem::remove_all(test_dir);
 
     Broker broker(test_dir);
-    PartitionId pid = 0;
+    uint32_t pid = 0;
 
     std::vector<uint8_t> msg = {'h', 'e', 'l', 'l', 'o'};
     Record record(RecordType::DATA, msg);
     spdlog::info("Producing message");
-    uint64_t offset = broker.produce(pid, record);
+    uint64_t offset = broker.produce("my_topic", "my_key", record);
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     spdlog::info("Produced offset {}", offset);
 
     spdlog::info("Consuming message");
-    auto result = broker.consume(pid, offset);
+    auto result = broker.consume("my_topic", "my_key", offset);
     auto payload = result.payload();
     std::string payload_str(payload.begin(), payload.end());
     spdlog::info("Payload: {}", payload_str);

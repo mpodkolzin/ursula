@@ -21,7 +21,7 @@ public:
     bool is_valid() const;
     int get_fd() const;
     void fsync();
-
+    size_t file_size() const;
 private:
     int fd_;
     void close_fd();

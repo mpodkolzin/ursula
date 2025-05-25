@@ -1,4 +1,5 @@
 #include "record/record.h"
+#include <spdlog/spdlog.h>
 
 Record::Record(RecordType type, std::vector<uint8_t> payload)
     : type_(type), payload_(std::move(payload)) {}
@@ -38,8 +39,10 @@ std::vector<uint8_t> Record::serialize() const {
 }
 
 Record Record::deserialize(const std::vector<uint8_t>& buffer, size_t& offset) {
+    spdlog::info("Record::deserialize: offset='{}'", offset);
     uint32_t magic = read_u32(buffer, offset);
     if (magic != MAGIC) {
+        spdlog::error("Record::deserialize: Invalid record magic number='{}'", magic);
         throw std::runtime_error("Invalid record magic number");
     }
 
@@ -48,6 +51,7 @@ Record Record::deserialize(const std::vector<uint8_t>& buffer, size_t& offset) {
     RecordType type = static_cast<RecordType>(read_u8(buffer, offset));
 
     if (offset + length > buffer.size()) {
+        spdlog::error("Record::deserialize: Payload length exceeds buffer size");
         throw std::runtime_error("Payload length exceeds buffer size");
     }
 
@@ -60,6 +64,7 @@ Record Record::deserialize(const std::vector<uint8_t>& buffer, size_t& offset) {
     uint32_t actual_crc = calculate_crc(crc_input);
 
     if (actual_crc != expected_crc) {
+        spdlog::error("Record::deserialize: CRC mismatch in record");
         throw std::runtime_error("CRC mismatch in record");
     }
 
@@ -73,6 +78,7 @@ uint32_t Record::calculate_crc(const std::vector<uint8_t>& data) {
     for (auto b : data) {
         crc += b;
     }
+    spdlog::info("Record::calculate_crc: crc='{}'", crc);
     return crc; // NOT safe — just for compileability if no CRC lib linked
 }
 

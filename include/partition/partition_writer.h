@@ -1,51 +1,24 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include <map>
 #include <memory>
-#include "io/file_handle.h"
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+#include <string>
+#include "partition/log_segment.h"
 #include "record/record.h"
 
 class PartitionWriter {
 public:
-    PartitionWriter(const std::string& directory, uint64_t base_offset);
-    ~PartitionWriter();
+    PartitionWriter(std::map<uint64_t, std::unique_ptr<LogSegment>>& segments, const std::string& partition_path, size_t max_segment_size_bytes = 10 * 1024 * 1024);
 
     uint64_t append(const Record& record);
-    void flush();
-    void roll_segment();
 
 private:
-    std::string directory_;
-    uint64_t next_offset_;
-    uint64_t base_offset_;
-    size_t segment_size_limit_;
-    size_t buffer_flush_threshold_;
-    uint64_t flush_interval_ms_;
+    std::map<uint64_t, std::unique_ptr<LogSegment>>& segments_;
+    std::string partition_path_;
+    uint64_t next_offset_ = 0;
+    size_t max_segment_size_bytes_;
 
-    std::unique_ptr<FileHandle> log_file_;
-    std::unique_ptr<FileHandle> index_file_;
-
-    std::vector<uint8_t> log_buffer_;
-    std::vector<uint8_t> index_buffer_;
-    size_t bytes_written_in_segment_;
-
-    std::thread flush_thread_;
-    std::mutex flush_mutex_;
-    std::condition_variable flush_cv_;
-    std::atomic<bool> flush_requested_;
-    std::atomic<bool> running_;
-
-    bool sync_on_flush_;
-
-
-    void open_segment_files();
-    void write_record(uint64_t offset, const Record& message);
-    void write_index_entry(uint32_t relative_offset, uint32_t position);
-
-    void flush_buffers();
-    void flush_loop();
+    LogSegment& active_segment();
+    void roll_segment();
+    bool should_roll_segment() const;
 };
