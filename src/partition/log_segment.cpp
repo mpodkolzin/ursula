@@ -79,6 +79,7 @@ Record LogSegment::read(uint64_t offset) const {
             return record_reader_->read_at(pos);  // 🔁 now uses the helper
         }
     }
+    
 
     throw std::runtime_error("Offset not found in index");
 }

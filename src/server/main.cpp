@@ -4,6 +4,7 @@
 #include "partition/partition_writer.h"
 #include "broker/broker.h"
 #include "record/record.h"
+#include "nlohmann/json.hpp"
 
 void handle_hello(const httplib::Request& req, httplib::Response& res) {
     res.set_content("Hello World", "text/plain");
@@ -27,16 +28,73 @@ int main() {
         spdlog::info("CONTROLLER Producing to topic='my_topic', key='my_key', data='{}'", data);
         Record record(RecordType::DATA, payload);
         auto result = broker.produce("my_topic", "my_key", record);
-        res.set_content("Produced", "text/plain");
+        res.set_content("Produced " + data, "text/plain");
+    });
+
+    svr.Post("/offset", [&broker](const httplib::Request& req, httplib::Response& res) {
+        auto data = nlohmann::json::parse(req.body);
+        std::string key = data.value("key", "");
+        std::string topic = data.value("topic", "");
+        uint64_t offset = data.value("offset", 0);
+        spdlog::debug("CONTROLLER Consuming from topic='{}', key='{}', offset='{}'", topic, key, offset);
+        Record rec = broker.consume(topic, key, offset);
+        std::string result_str(rec.payload().begin(), rec.payload().end());
+        nlohmann::json result_json = {
+            {"offset", offset},
+            {"payload", result_str},
+            {"status", "ok"}
+        };
+        res.set_content(result_json.dump(), "application/json");
     });
 
     svr.Get(R"(/offset/(\d+))", [&broker](const httplib::Request& req, httplib::Response& res) {
         std::string offset_str = req.matches[1]; // First capture group
         int offset = std::stoi(offset_str);
-        auto result = broker.consume("my_topic", "my_key", offset);
-        auto result_array = result.payload();
-        std::string result_str(result_array.begin(), result_array.end());
-        res.set_content(result_str, "text/plain");
+        try {
+            auto result = broker.consume("my_topic", "my_key", offset);
+            auto result_array = result.payload();
+            std::string result_str(result_array.begin(), result_array.end());
+            nlohmann::json result_json = {
+                {"offset", offset},
+                {"payload", result_str }
+            };
+            res.set_content(result_json.dump(), "application/json");
+        } catch (const std::runtime_error& e) {
+            nlohmann::json error_json = {
+                {"error", e.what()}
+            };
+            res.set_content(error_json.dump(), "application/json");
+        }
+    });
+
+    svr.Post("/data", [&broker](const httplib::Request& req, httplib::Response& res) {
+        try {
+            // Parse incoming JSON
+            auto data = nlohmann::json::parse(req.body);
+
+            // Access value (e.g., {"name": "Max"})
+            std::string key = data.value("key", "");
+            std::string topic = data.value("topic", "");
+            std::string value = data.value("value", "");
+
+            Record record(RecordType::DATA, value);
+            auto result = broker.produce(topic, key, record);
+
+            // Create response JSON
+            nlohmann::json response = {
+                {"message", "Produced " + value + " to topic=" + topic + " with key=" + key},
+                {"status", "ok"}
+            };
+            spdlog::info("Produced {} to topic={} with key={}", value, topic, key);
+            res.set_content(response.dump(), "application/json");
+        } catch (const std::exception& e) {
+            nlohmann::json error = {
+                {"error", "Invalid JSON"},
+                {"details", e.what()}
+            };
+            res.status = 400;
+            res.set_content(error.dump(), "application/json");
+        }
     });
 
 

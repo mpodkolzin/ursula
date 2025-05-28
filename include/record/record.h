@@ -17,6 +17,7 @@ public:
     static constexpr uint32_t MAGIC = 0xFACADE01;
 
     Record(RecordType type, std::vector<uint8_t> payload);
+    Record(RecordType type, std::string& payload);
 
     std::vector<uint8_t> serialize() const;
     static Record deserialize(const std::vector<uint8_t>& buffer, size_t& offset);

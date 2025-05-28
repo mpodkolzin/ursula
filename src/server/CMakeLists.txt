@@ -15,9 +15,18 @@ FetchContent_Declare(
 )
 
 
+include(FetchContent)
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG        v3.11.3 # or latest release tag
+)
+
+
 
 FetchContent_MakeAvailable(httplib)
 FetchContent_MakeAvailable(spdlog)
+FetchContent_MakeAvailable(json)
 
 add_executable(ursula
     main.cpp
@@ -35,3 +44,4 @@ target_link_libraries(ursula PRIVATE io)
 target_link_libraries(ursula PRIVATE broker)
 target_link_libraries(ursula PRIVATE topic)
 target_link_libraries(ursula PRIVATE httplib::httplib)
+target_link_libraries(ursula PRIVATE nlohmann_json)

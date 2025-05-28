@@ -4,6 +4,12 @@
 Record::Record(RecordType type, std::vector<uint8_t> payload)
     : type_(type), payload_(std::move(payload)) {}
 
+Record::Record(RecordType type, std::string& payload)
+    : type_(type)
+    {
+        payload_.insert(payload_.end(), payload.begin(), payload.end());
+    }
+
 RecordType Record::type() const {
     return type_;
 }
