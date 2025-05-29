@@ -1,9 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include "broker/broker.h"
+#include "consumer/consumer_group.h"
+#include "client/local_client.h"
 #include <filesystem>
-#include "record/record.h"
-#include "spdlog/spdlog.h"
-
+#include <thread>
+#include <chrono>
 
 TEST_CASE("Broker end-to-end: produce, consume, persist") {
     std::string test_dir = "./test_data_broker";
@@ -11,28 +12,37 @@ TEST_CASE("Broker end-to-end: produce, consume, persist") {
 
     // Step 1: Create broker and produce
     {
-        Broker broker(test_dir);
+        auto broker = std::make_shared<Broker>(test_dir, 1);
         std::string topic = "e2e_topic";
         std::string key = "e2e_key";
         Record record(RecordType::DATA, {'h', 'e', 'l', 'l', 'o'});
 
-        uint64_t offset = broker.produce(topic, key, record);
+        auto client = std::make_shared<LocalBrokerConsumerClient>(broker);
+
+        uint64_t offset = broker->produce(topic, key, record);
         REQUIRE(offset == 0);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100)); // allow flush
 
-        Record out = broker.consume(topic, key, offset);
-        REQUIRE(out.payload() == record.payload());
+        ConsumerGroup group("test_group", client);
+        group.subscribe(topic);
+        std::optional<Record> out = group.poll(topic, 1);
+        REQUIRE(out.has_value());
+        REQUIRE(out.value().payload() == record.payload());
     }
 
     // Step 2: Simulate restart
     {
-        Broker broker(test_dir);
+        Record record(RecordType::DATA, {'h', 'e', 'l', 'l', 'o'});
         std::string topic = "e2e_topic";
-        std::string key = "e2e_key";
+        auto broker = std::make_shared<Broker>(test_dir, 1);
+        auto client = std::make_shared<LocalBrokerConsumerClient>(broker);
+        ConsumerGroup group("test_group", client);
+        group.subscribe(topic);
 
-        Record out = broker.consume(topic, key, 0);
-        REQUIRE(out.payload() == std::vector<uint8_t>{'h', 'e', 'l', 'l', 'o'});
+        std::optional<Record> out = group.poll(topic, 1);
+        REQUIRE(out.has_value());
+        REQUIRE(out.value().payload() == record.payload());
     }
 
     std::filesystem::remove_all(test_dir);

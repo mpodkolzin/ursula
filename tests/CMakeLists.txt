@@ -22,7 +22,7 @@ target_link_libraries(test_broker PRIVATE topic)
 target_link_libraries(test_broker PRIVATE record)
 target_link_libraries(test_broker PRIVATE util)
 target_link_libraries(test_broker PRIVATE io)
+target_link_libraries(test_broker PRIVATE consumer)
 target_link_libraries(test_broker PRIVATE broker)
-
-
+target_link_libraries(test_broker PRIVATE broker_client)
 

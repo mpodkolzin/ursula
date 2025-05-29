@@ -12,6 +12,7 @@ public:
 
     uint64_t append(const std::string& key, const Record& record);
     Record read(const std::string& key, uint64_t offset);
+    Record read(uint32_t partition_id, uint64_t offset);
 
 private:
     std::string name_;
