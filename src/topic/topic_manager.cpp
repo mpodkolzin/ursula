@@ -27,3 +27,7 @@ uint64_t TopicManager::produce(const std::string& topic, const std::string& key,
 Record TopicManager::consume(const std::string& topic, const std::string& key, uint64_t offset) {
     return get_or_create_topic(topic).read(key, offset);
 }
+
+Record TopicManager::consume(const std::string& topic, uint32_t partition_id, uint64_t offset) {
+    return get_or_create_topic(topic).read(partition_id, offset);
+}

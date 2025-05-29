@@ -30,6 +30,10 @@ Record Topic::read(const std::string& key, uint64_t offset) {
     return get_partition(pid).read(offset);
 }
 
+Record Topic::read(uint32_t partition_id, uint64_t offset) {
+    return get_partition(partition_id).read(offset);
+}
+
 uint32_t Topic::hash_to_partition(const std::string& key) const {
     return std::hash<std::string>{}(key) % num_partitions_;
 }

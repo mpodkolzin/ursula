@@ -13,27 +13,27 @@ TEST_CASE("Broker basic produce and consume") {
 
     std::vector<uint8_t> msg = {'h', 'e', 'l', 'l', 'o'};
     Record record(RecordType::DATA, msg);
-    spdlog::info("Producing message");
+    spdlog::debug("Producing message");
     uint64_t offset = broker.produce("my_topic", "my_key", record);
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    spdlog::info("Produced offset {}", offset);
+    spdlog::debug("Produced offset {}", offset);
 
-    spdlog::info("Consuming message");
+    spdlog::debug("Consuming message");
     auto result = broker.consume("my_topic", "my_key", offset);
     auto payload = result.payload();
     std::string payload_str(payload.begin(), payload.end());
-    spdlog::info("Payload: {}", payload_str);
+    spdlog::debug("Payload: {}", payload_str);
 
-    spdlog::info("Consumed offset _ {}", offset);
+    spdlog::debug("Consumed offset _ {}", offset);
 
     //REQUIRE(result == msg);
-    spdlog::info("checking offset");
+    spdlog::debug("checking offset");
     REQUIRE(offset == 0);
-    spdlog::info("checking produced");
+    spdlog::debug("checking produced");
     REQUIRE(broker.metrics().produced() == 1);
-    spdlog::info("checking consumed");
+    spdlog::debug("checking consumed");
     REQUIRE(broker.metrics().consumed() == 1);
-    spdlog::info("removing test dir");
+    spdlog::debug("removing test dir");
     std::filesystem::remove_all(test_dir);
-    spdlog::info("test dir removed");
+    spdlog::debug("test dir removed");
 }

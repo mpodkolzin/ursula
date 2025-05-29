@@ -45,7 +45,7 @@ std::vector<uint8_t> Record::serialize() const {
 }
 
 Record Record::deserialize(const std::vector<uint8_t>& buffer, size_t& offset) {
-    spdlog::info("Record::deserialize: offset='{}'", offset);
+    spdlog::debug("Record::deserialize: offset='{}'", offset);
     uint32_t magic = read_u32(buffer, offset);
     if (magic != MAGIC) {
         spdlog::error("Record::deserialize: Invalid record magic number='{}'", magic);
@@ -84,7 +84,7 @@ uint32_t Record::calculate_crc(const std::vector<uint8_t>& data) {
     for (auto b : data) {
         crc += b;
     }
-    spdlog::info("Record::calculate_crc: crc='{}'", crc);
+    spdlog::debug("Record::calculate_crc: crc='{}'", crc);
     return crc; // NOT safe — just for compileability if no CRC lib linked
 }
 
