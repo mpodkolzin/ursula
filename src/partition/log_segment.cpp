@@ -40,7 +40,7 @@ bool LogSegment::contains(uint64_t offset) const {
     return offset >= base_offset_;
 }
 uint64_t LogSegment::append(uint64_t offset, const Record& record) {
-    spdlog::info("LogSegment::append: offset='{}'", offset);
+    spdlog::debug("LogSegment::append: offset='{}'", offset);
     uint32_t relative_offset = static_cast<uint32_t>(offset - base_offset_);
     uint32_t pos_in_log = static_cast<uint32_t>(log_writer_->current_offset());
 
@@ -61,25 +61,25 @@ uint64_t LogSegment::append(uint64_t offset, const Record& record) {
 }
 
 Record LogSegment::read(uint64_t offset) const {
-    spdlog::info("LogSegment::read: offset='{}'", offset);
+    spdlog::debug("LogSegment::read: offset='{}'", offset);
     uint32_t relative = static_cast<uint32_t>(offset - base_offset_);
     size_t entry_size = sizeof(uint32_t) * 2;
     size_t index_size = index_file_raw_->file_size();
     size_t entry_count = index_size / entry_size;
-    spdlog::info("LogSegment::read: entry_count='{}'", entry_count);
+    spdlog::debug("LogSegment::read: entry_count='{}'", entry_count);
 
     for (size_t i = 0; i < entry_count; ++i) {
         index_file_raw_->seek(i * entry_size, SEEK_SET);
         uint32_t ro, pos;
         index_file_raw_->read(&ro, sizeof(ro));
         index_file_raw_->read(&pos, sizeof(pos));
-        spdlog::info("LogSegment::read: ro='{}', pos='{}'", ro, pos);
+        spdlog::debug("LogSegment::read: ro='{}', pos='{}'", ro, pos);
         if (ro == relative) {
-            spdlog::info("LogSegment::read: found offset='{}'", offset);
+            spdlog::debug("LogSegment::read: found offset='{}'", offset);
             return record_reader_->read_at(pos);  // 🔁 now uses the helper
         }
     }
-    
+
 
     throw std::runtime_error("Offset not found in index");
 }

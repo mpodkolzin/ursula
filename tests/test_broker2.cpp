@@ -26,7 +26,7 @@ TEST_CASE("Broker end-to-end: produce, consume, persist") {
 
         ConsumerGroup group("test_group", client);
         group.subscribe(topic);
-        std::optional<Record> out = group.poll(topic, 1);
+        std::optional<Record> out = group.poll(topic, 0);
         REQUIRE(out.has_value());
         REQUIRE(out.value().payload() == record.payload());
     }
@@ -40,7 +40,7 @@ TEST_CASE("Broker end-to-end: produce, consume, persist") {
         ConsumerGroup group("test_group", client);
         group.subscribe(topic);
 
-        std::optional<Record> out = group.poll(topic, 1);
+        std::optional<Record> out = group.poll(topic, 0);
         REQUIRE(out.has_value());
         REQUIRE(out.value().payload() == record.payload());
     }

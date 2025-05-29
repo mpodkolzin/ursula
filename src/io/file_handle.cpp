@@ -10,7 +10,7 @@ FileHandle::FileHandle(int fd) : fd_(fd) {}
 
 FileHandle::FileHandle(const std::string& path, int flags, mode_t mode)
 {
-    spdlog::info("FileHandle::FileHandle: path='{}', flags='{}', mode='{}'", path, flags, mode);
+    spdlog::debug("FileHandle::FileHandle: path='{}', flags='{}', mode='{}'", path, flags, mode);
     fd_ = ::open(path.c_str(), flags, mode);
     if (fd_ < 0) {
         spdlog::error("FileHandle::FileHandle: Failed to open file '{}': {}", path, std::strerror(errno));

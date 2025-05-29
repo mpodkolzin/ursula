@@ -4,9 +4,10 @@
 #include "offset_store/offset_store.h"
 
 
-Broker::Broker(const std::string& data_dir, size_t default_partitions)
+Broker::Broker(const std::string& data_dir, size_t default_partitions, std::unique_ptr<OffsetStore> offset_store)
     : metrics_(std::make_unique<MetricsCollector>()),
-      topic_manager_(std::make_unique<TopicManager>(data_dir, default_partitions)) {}
+      topic_manager_(std::make_unique<TopicManager>(data_dir, default_partitions)),
+      offset_store_(std::move(offset_store)) {}
 
 uint64_t Broker::produce(const std::string& topic, const std::string& key, const Record& record) {
     metrics_->increment_produced();
