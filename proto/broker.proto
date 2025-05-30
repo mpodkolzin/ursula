@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package broker;
+
+service BrokerService {
+  rpc Produce(ProduceRequest) returns (ProduceResponse);
+  rpc Consume(ConsumeRequest) returns (ConsumeResponse);
+  rpc CommitOffset(CommitOffsetRequest) returns (Empty);
+  rpc GetCommittedOffset(GetCommittedOffsetRequest) returns (CommittedOffsetResponse);
+}
+
+message ProduceRequest {
+  string topic = 1;
+  string key = 2;
+  bytes payload = 3;
+}
+
+message ProduceResponse {
+  uint64 offset = 1;
+}
+
+message ConsumeRequest {
+  string topic = 1;
+  uint32 partition_id = 2;
+  uint64 offset = 3;
+}
+
+message ConsumeResponse {
+  bytes payload = 1;
+}
+
+message CommitOffsetRequest {
+  string group_id = 1;
+  string topic = 2;
+  uint32 partition_id = 3;
+  uint64 offset = 4;
+}
+
+message GetCommittedOffsetRequest {
+  string group_id = 1;
+  string topic = 2;
+  uint32 partition_id = 3;
+}
+
+message CommittedOffsetResponse {
+  uint64 offset = 1;
+}
+
+message Empty {}

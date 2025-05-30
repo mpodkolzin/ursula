@@ -49,8 +49,8 @@ uint64_t ConsumerGroup::get_offset(const std::string& topic, uint32_t partition_
         auto part_it = topic_it->second.find(partition_id);
         if (part_it != topic_it->second.end()) {
             return part_it->second;
+        }
     }
-}
     return client_->get_committed_offset(group_id_, topic, partition_id);
 }
 

@@ -32,6 +32,19 @@ add_executable(ursula
     main.cpp
 )
 
+
+target_include_directories(ursula
+  PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${PROJECT_SOURCE_DIR}/proto
+)
+
+target_link_libraries(ursula
+  PRIVATE
+    proto_generated
+)
+
+
 # Link the 'wal' library (must be defined before in the build order)
 #target_link_libraries(main_exec PRIVATE wal)
 #target_link_libraries(main_exec PRIVATE io)
