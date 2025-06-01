@@ -2,13 +2,15 @@
 #include <spdlog/spdlog.h>
 #include "client/broker_client.h"
 #include "offset_store/offset_store.h"
-
+#include "topic/topic_manager.h"
+#include <spdlog/spdlog.h>
 
 Broker::Broker(const std::string& data_dir, size_t default_partitions)
     : metrics_(std::make_unique<MetricsCollector>()),
       topic_manager_(std::make_unique<TopicManager>(data_dir, default_partitions)) {}
 
 uint64_t Broker::produce(const std::string& topic, const std::string& key, const Record& record) {
+    spdlog::debug("Producing record to topic: {}", topic);
     metrics_->increment_produced();
     return topic_manager_->produce(topic, key, record);
 }

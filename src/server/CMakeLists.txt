@@ -30,6 +30,8 @@ FetchContent_MakeAvailable(json)
 
 add_executable(ursula
     main.cpp
+    rest_server.cpp
+    grpc_server.cpp
 )
 
 

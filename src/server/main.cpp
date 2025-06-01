@@ -13,7 +13,8 @@
 #include "nlohmann/json.hpp"
 #include "client/local_client.h"    
 #include "broker/broker_service_impl.h"
-
+#include "server/rest_server.h"
+#include "server/grpc_server.h"
 
 void handle_hello(const httplib::Request& req, httplib::Response& res) {
     res.set_content("Hello World", "text/plain");
@@ -21,19 +22,18 @@ void handle_hello(const httplib::Request& req, httplib::Response& res) {
 }
 
 int main() {
-    std::string server_address("0.0.0.0:50051");
+    spdlog::set_level(spdlog::level::debug);
     std::string data_dir = "./broker_data";
+    auto broker = std::make_shared<Broker>(data_dir, 5);
+    std::thread rest_server_thread([broker]() {
+        run_rest_server(broker);
+    });
+    std::thread grpc_server_thread([broker]() {
+        run_grpc_server(broker);
+    });
 
-    auto broker = std::make_shared<Broker>(data_dir, 1);
-    BrokerServiceImpl service(broker);
-
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Broker gRPC server listening on " << server_address << std::endl;
-    server->Wait();
+    rest_server_thread.join();
+    grpc_server_thread.join();
 
     return 0;
 }
@@ -41,7 +41,6 @@ int main() {
 //int main() {
 //    // Create a server instance
 //    httplib::Server svr;
-//    spdlog::set_level(spdlog::level::info);
 //
 //
 //    // Define a route handler
