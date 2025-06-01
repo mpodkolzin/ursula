@@ -12,7 +12,7 @@ class Broker {
 public:
     Broker(const Broker&) = delete;
     Broker& operator=(const Broker&) = delete;
-    explicit Broker(const std::string& data_dir, size_t default_partitions = 3, std::unique_ptr<OffsetStore> offset_store = nullptr);
+    explicit Broker(const std::string& data_dir, size_t default_partitions = 3);
     // For testing
     explicit Broker(const std::string& data_dir, std::unique_ptr<MetricsCollector> metrics_override);
 
@@ -27,7 +27,6 @@ public:
 private:
     std::unique_ptr<TopicManager> topic_manager_;
     std::unique_ptr<MetricsCollector> metrics_;
-    std::unique_ptr<OffsetStore> offset_store_;
     mutable std::mutex offset_mutex_;
     std::unordered_map<std::string,  // group_id
     std::unordered_map<std::string,  // topic

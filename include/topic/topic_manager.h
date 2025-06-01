@@ -19,5 +19,6 @@ private:
     Topic& get_or_create_topic(const std::string& name);
     std::string root_dir_;
     size_t default_partitions_;
+    std::mutex mutex_;
     std::unordered_map<std::string, std::unique_ptr<Topic>> topics_;
 };

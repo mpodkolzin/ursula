@@ -8,12 +8,14 @@
 #include "partition/partition_reader.h"
 #include "record/record.h"
 #include "partition/partition.h"
-
+#include <cassert>
 
 Partition::Partition(const std::string& path) : path_(path) {
     load_segments();
     writer_ = std::make_unique<PartitionWriter>(segments_, path_);
     reader_ = std::make_unique<PartitionReader>(segments_);
+    assert(writer_);
+    assert(reader_);
 }
 
 void Partition::load_segments() {
@@ -37,6 +39,7 @@ void Partition::load_segments() {
 }
 
 uint64_t Partition::append(const Record& record) {
+    assert(writer_);
     return writer_->append(record);
 }
 
