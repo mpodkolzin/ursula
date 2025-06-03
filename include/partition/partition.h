@@ -16,6 +16,8 @@ public:
     Record read(uint64_t offset);
 
 private:
+
+    std::mutex mutex_;
     std::map<uint64_t, std::unique_ptr<LogSegment>> segments_;
     std::unique_ptr<PartitionWriter> writer_;
     std::unique_ptr<PartitionReader> reader_;

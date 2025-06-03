@@ -14,6 +14,9 @@ public:
     uint64_t produce(const std::string& topic, const std::string& key, const Record& record);
     Record consume(const std::string& topic, const std::string& key, uint64_t offset);
     Record consume(const std::string& topic, uint32_t partition_id, uint64_t offset);
+
+    //alternative producer implementation
+    std::future<uint64_t> produce_async(const std::string& topic, const std::string& key, const Record& record);
 private:
 
     Topic& get_or_create_topic(const std::string& name);

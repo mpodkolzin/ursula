@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x62roker.proto\x12\x06\x62roker\"=\n\x0eProduceRequest\x12\r\n\x05topic\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x0f\n\x07payload\x18\x03 \x01(\x0c\"!\n\x0fProduceResponse\x12\x0e\n\x06offset\x18\x01 \x01(\x04\"E\n\x0e\x43onsumeRequest\x12\r\n\x05topic\x18\x01 \x01(\t\x12\x14\n\x0cpartition_id\x18\x02 \x01(\r\x12\x0e\n\x06offset\x18\x03 \x01(\x04\"\"\n\x0f\x43onsumeResponse\x12\x0f\n\x07payload\x18\x01 \x01(\x0c\"\\\n\x13\x43ommitOffsetRequest\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\r\n\x05topic\x18\x02 \x01(\t\x12\x14\n\x0cpartition_id\x18\x03 \x01(\r\x12\x0e\n\x06offset\x18\x04 \x01(\x04\"R\n\x19GetCommittedOffsetRequest\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\r\n\x05topic\x18\x02 \x01(\t\x12\x14\n\x0cpartition_id\x18\x03 \x01(\r\")\n\x17\x43ommittedOffsetResponse\x12\x0e\n\x06offset\x18\x01 \x01(\x04\"\x07\n\x05\x45mpty2\x9d\x02\n\rBrokerService\x12:\n\x07Produce\x12\x16.broker.ProduceRequest\x1a\x17.broker.ProduceResponse\x12:\n\x07\x43onsume\x12\x16.broker.ConsumeRequest\x1a\x17.broker.ConsumeResponse\x12:\n\x0c\x43ommitOffset\x12\x1b.broker.CommitOffsetRequest\x1a\r.broker.Empty\x12X\n\x12GetCommittedOffset\x12!.broker.GetCommittedOffsetRequest\x1a\x1f.broker.CommittedOffsetResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x62roker.proto\x12\x06\x62roker\"=\n\x0eProduceRequest\x12\r\n\x05topic\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x0f\n\x07payload\x18\x03 \x01(\x0c\"!\n\x0fProduceResponse\x12\x0e\n\x06offset\x18\x01 \x01(\x04\"W\n\x0e\x43onsumeRequest\x12\r\n\x05topic\x18\x01 \x01(\t\x12\x14\n\x0cpartition_id\x18\x02 \x01(\r\x12\x0e\n\x06offset\x18\x03 \x01(\x04\x12\x10\n\x08group_id\x18\x04 \x01(\t\"\"\n\x0f\x43onsumeResponse\x12\x0f\n\x07payload\x18\x01 \x01(\x0c\"\\\n\x13\x43ommitOffsetRequest\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\r\n\x05topic\x18\x02 \x01(\t\x12\x14\n\x0cpartition_id\x18\x03 \x01(\r\x12\x0e\n\x06offset\x18\x04 \x01(\x04\"R\n\x19GetCommittedOffsetRequest\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\r\n\x05topic\x18\x02 \x01(\t\x12\x14\n\x0cpartition_id\x18\x03 \x01(\r\")\n\x17\x43ommittedOffsetResponse\x12\x0e\n\x06offset\x18\x01 \x01(\x04\"3\n\x10SubscribeRequest\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\r\n\x05topic\x18\x02 \x01(\t\"\x07\n\x05\x45mpty2\x97\x03\n\rBrokerService\x12:\n\x07Produce\x12\x16.broker.ProduceRequest\x1a\x17.broker.ProduceResponse\x12:\n\x07\x43onsume\x12\x16.broker.ConsumeRequest\x1a\x17.broker.ConsumeResponse\x12:\n\x0c\x43ommitOffset\x12\x1b.broker.CommitOffsetRequest\x1a\r.broker.Empty\x12X\n\x12GetCommittedOffset\x12!.broker.GetCommittedOffsetRequest\x1a\x1f.broker.CommittedOffsetResponse\x12\x42\n\rConsumeStream\x12\x16.broker.ConsumeRequest\x1a\x17.broker.ConsumeResponse0\x01\x12\x34\n\tSubscribe\x12\x18.broker.SubscribeRequest\x1a\r.broker.Emptyb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,17 +36,19 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_PRODUCERESPONSE']._serialized_start=87
   _globals['_PRODUCERESPONSE']._serialized_end=120
   _globals['_CONSUMEREQUEST']._serialized_start=122
-  _globals['_CONSUMEREQUEST']._serialized_end=191
-  _globals['_CONSUMERESPONSE']._serialized_start=193
-  _globals['_CONSUMERESPONSE']._serialized_end=227
-  _globals['_COMMITOFFSETREQUEST']._serialized_start=229
-  _globals['_COMMITOFFSETREQUEST']._serialized_end=321
-  _globals['_GETCOMMITTEDOFFSETREQUEST']._serialized_start=323
-  _globals['_GETCOMMITTEDOFFSETREQUEST']._serialized_end=405
-  _globals['_COMMITTEDOFFSETRESPONSE']._serialized_start=407
-  _globals['_COMMITTEDOFFSETRESPONSE']._serialized_end=448
-  _globals['_EMPTY']._serialized_start=450
-  _globals['_EMPTY']._serialized_end=457
-  _globals['_BROKERSERVICE']._serialized_start=460
-  _globals['_BROKERSERVICE']._serialized_end=745
+  _globals['_CONSUMEREQUEST']._serialized_end=209
+  _globals['_CONSUMERESPONSE']._serialized_start=211
+  _globals['_CONSUMERESPONSE']._serialized_end=245
+  _globals['_COMMITOFFSETREQUEST']._serialized_start=247
+  _globals['_COMMITOFFSETREQUEST']._serialized_end=339
+  _globals['_GETCOMMITTEDOFFSETREQUEST']._serialized_start=341
+  _globals['_GETCOMMITTEDOFFSETREQUEST']._serialized_end=423
+  _globals['_COMMITTEDOFFSETRESPONSE']._serialized_start=425
+  _globals['_COMMITTEDOFFSETRESPONSE']._serialized_end=466
+  _globals['_SUBSCRIBEREQUEST']._serialized_start=468
+  _globals['_SUBSCRIBEREQUEST']._serialized_end=519
+  _globals['_EMPTY']._serialized_start=521
+  _globals['_EMPTY']._serialized_end=528
+  _globals['_BROKERSERVICE']._serialized_start=531
+  _globals['_BROKERSERVICE']._serialized_end=938
 # @@protoc_insertion_point(module_scope)

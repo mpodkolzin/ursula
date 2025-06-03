@@ -5,9 +5,11 @@
 #include "topic/topic_manager.h"
 #include <spdlog/spdlog.h>
 
-Broker::Broker(const std::string& data_dir, size_t default_partitions)
+Broker::Broker(const std::string& data_dir, size_t default_partitions, std::shared_ptr<ConsumerOffsetStore> offset_store)
     : metrics_(std::make_unique<MetricsCollector>()),
-      topic_manager_(std::make_unique<TopicManager>(data_dir, default_partitions)) {}
+      topic_manager_(std::make_unique<TopicManager>(data_dir, default_partitions)),
+      offset_store_(offset_store) {}
+
 
 uint64_t Broker::produce(const std::string& topic, const std::string& key, const Record& record) {
     spdlog::debug("Producing record to topic: {}", topic);
@@ -28,9 +30,10 @@ Record Broker::consume(const std::string& topic, uint32_t partition_id, uint64_t
 void Broker::commit_offset(const std::string& group_id, const std::string& topic, uint32_t partition_id, uint64_t offset) {
     std::lock_guard<std::mutex> lock(offset_mutex_);
     offset_table_[group_id][topic][partition_id] = offset;
+    offset_store_->save_offset(group_id, topic, partition_id, offset);
 }
 
-uint64_t Broker::get_committed_offset(const std::string& group_id, const std::string& topic, uint32_t partition_id) const {
+uint64_t Broker::get_committed_offset(const std::string& group_id, const std::string& topic, uint32_t partition_id) {
     std::lock_guard<std::mutex> lock(offset_mutex_);
     auto group_it = offset_table_.find(group_id);
     if (group_it != offset_table_.end()) {
@@ -42,9 +45,19 @@ uint64_t Broker::get_committed_offset(const std::string& group_id, const std::st
             }
         }
     }
-    return 0;
+    std::optional<uint64_t> offset = offset_store_->load_offset(group_id, topic, partition_id);
+    if (offset) { 
+        offset_table_[group_id][topic][partition_id] = offset.value();
+    }
+    return offset.value_or(0);
 }
 
 const MetricsCollector& Broker::metrics() const {
     return *metrics_;
+}
+
+
+void Broker::produce_async(const std::string& topic, const std::string& key, const Record& record) {
+    metrics_->increment_produced();
+    topic_manager_->produce_async(topic, key, record);
 }

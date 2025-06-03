@@ -15,6 +15,7 @@ PartitionWriter::PartitionWriter(std::map<uint64_t, std::unique_ptr<LogSegment>>
 }
 
 uint64_t PartitionWriter::append(const Record& record) {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (should_roll_segment()) {
         roll_segment();
     }

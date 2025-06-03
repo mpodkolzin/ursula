@@ -30,6 +30,10 @@ uint64_t TopicManager::produce(const std::string& topic, const std::string& key,
     return get_or_create_topic(topic).append(key, record);
 }
 
+std::future<uint64_t> TopicManager::produce_async(const std::string& topic, const std::string& key, const Record& record) {
+    return get_or_create_topic(topic).append_async(key, record);
+}
+
 Record TopicManager::consume(const std::string& topic, const std::string& key, uint64_t offset) {
     spdlog::debug("Consuming record from topic: {}", topic);
     return get_or_create_topic(topic).read(key, offset);

@@ -25,4 +25,5 @@ target_link_libraries(test_broker PRIVATE io)
 target_link_libraries(test_broker PRIVATE consumer)
 target_link_libraries(test_broker PRIVATE broker)
 target_link_libraries(test_broker PRIVATE broker_client)
-
+target_link_libraries(test_broker PRIVATE producer)
+target_link_libraries(test_broker PRIVATE offset_store)

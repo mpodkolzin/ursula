@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <thread>
 #include <chrono>
+#include "offset_store/mock_offset_store.h"
 
 TEST_CASE("Broker end-to-end: produce, consume, persist") {
     std::string test_dir = "./test_data_broker";
@@ -12,7 +13,8 @@ TEST_CASE("Broker end-to-end: produce, consume, persist") {
 
     // Step 1: Create broker and produce
     {
-        auto broker = std::make_shared<Broker>(test_dir, 1);
+        auto offset_store = std::make_unique<MockOffsetStore>();
+        auto broker = std::make_shared<Broker>(test_dir, 1, std::move(offset_store));
         std::string topic = "e2e_topic";
         std::string key = "e2e_key";
         Record record(RecordType::DATA, {'h', 'e', 'l', 'l', 'o'});
@@ -33,9 +35,10 @@ TEST_CASE("Broker end-to-end: produce, consume, persist") {
 
     // Step 2: Simulate restart
     {
+        auto offset_store = std::make_unique<MockOffsetStore>();
         Record record(RecordType::DATA, {'h', 'e', 'l', 'l', 'o'});
         std::string topic = "e2e_topic";
-        auto broker = std::make_shared<Broker>(test_dir, 1);
+        auto broker = std::make_shared<Broker>(test_dir, 1, std::move(offset_store));
         auto client = std::make_shared<LocalBrokerConsumerClient>(broker);
         ConsumerGroup group("test_group", client);
         group.subscribe(topic);

@@ -18,7 +18,24 @@ Topic::Topic(const std::string& name, const std::string& root_dir, size_t num_pa
     for (uint32_t pid = 0; pid < static_cast<uint32_t>(num_partitions_); ++pid) {
         std::string partition_path = topic_path + "/partition_" + std::to_string(pid);
         partitions_[pid] = std::make_unique<Partition>(partition_path);
+        workers_[pid] = std::make_unique<PartitionWorker>(*partitions_[pid]);
     }
+}
+
+void Topic::start_workers() {
+    for (auto& worker : workers_) {
+        worker.second->start();
+    }
+}
+
+void Topic::stop_workers() {
+    for (auto& worker : workers_) {
+        worker.second->stop();
+    }
+}
+
+Topic::~Topic() {
+    stop_workers();
 }
 
 uint64_t Topic::append(const std::string& key, const Record& record) {
@@ -26,6 +43,16 @@ uint64_t Topic::append(const std::string& key, const Record& record) {
     uint32_t pid = hash_to_partition(key);
     return get_partition(pid).append(record);
 }
+
+std::future<uint64_t> Topic::append_async(const std::string& key, const Record& record) {
+    uint32_t pid = hash_to_partition(key);
+    auto& worker = workers_[pid];
+    if (!worker) {
+        throw std::runtime_error("PartitionWorker not found for partition: " + std::to_string(pid));
+    }
+    return worker->enqueue(record);
+}
+
 
 Record Topic::read(const std::string& key, uint64_t offset) {
     spdlog::debug("Reading record from topic: {} key: {}", name_, key);

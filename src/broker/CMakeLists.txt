@@ -6,3 +6,4 @@ add_library(broker STATIC
 target_include_directories(broker PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 target_link_libraries(broker PRIVATE spdlog::spdlog)
+target_link_libraries(broker PRIVATE offset_store)

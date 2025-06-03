@@ -7,6 +7,10 @@ service BrokerService {
   rpc Consume(ConsumeRequest) returns (ConsumeResponse);
   rpc CommitOffset(CommitOffsetRequest) returns (Empty);
   rpc GetCommittedOffset(GetCommittedOffsetRequest) returns (CommittedOffsetResponse);
+
+  rpc ConsumeStream(ConsumeRequest) returns (stream ConsumeResponse);
+  
+  rpc Subscribe(SubscribeRequest) returns (Empty);
 }
 
 message ProduceRequest {
@@ -22,7 +26,8 @@ message ProduceResponse {
 message ConsumeRequest {
   string topic = 1;
   uint32 partition_id = 2;
-  uint64 offset = 3;
+  uint64 offset = 3;           // Optional: only used if group_id is not provided
+  string group_id = 4;         // Optional: if provided, offset will be retrieved from broker state
 }
 
 message ConsumeResponse {
@@ -44,6 +49,12 @@ message GetCommittedOffsetRequest {
 
 message CommittedOffsetResponse {
   uint64 offset = 1;
+}
+
+
+message SubscribeRequest {
+  string group_id = 1;
+  string topic = 2;
 }
 
 message Empty {}

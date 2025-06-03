@@ -15,6 +15,9 @@
 #include "broker/broker_service_impl.h"
 #include "server/rest_server.h"
 #include "server/grpc_server.h"
+#include "offset_store/file_offset_store.h"
+#include "consumer/consumer_group_manager.h"
+#include "client/broker_client.h"
 
 void handle_hello(const httplib::Request& req, httplib::Response& res) {
     res.set_content("Hello World", "text/plain");
@@ -22,14 +25,17 @@ void handle_hello(const httplib::Request& req, httplib::Response& res) {
 }
 
 int main() {
-    spdlog::set_level(spdlog::level::debug);
+    spdlog::set_level(spdlog::level::info);
     std::string data_dir = "./broker_data";
-    auto broker = std::make_shared<Broker>(data_dir, 5);
+    auto offset_store = std::make_shared<FileOffsetStore>(data_dir);
+    auto broker = std::make_shared<Broker>(data_dir, 5, std::move(offset_store));
+    auto consumer_client = std::make_shared<LocalBrokerConsumerClient>(broker);
+    auto consumer_group_manager = std::make_shared<ConsumerGroupManager>(consumer_client, offset_store);
     std::thread rest_server_thread([broker]() {
         run_rest_server(broker);
     });
-    std::thread grpc_server_thread([broker]() {
-        run_grpc_server(broker);
+    std::thread grpc_server_thread([broker, consumer_group_manager]() {
+        run_grpc_server(broker, consumer_group_manager);
     });
 
     rest_server_thread.join();

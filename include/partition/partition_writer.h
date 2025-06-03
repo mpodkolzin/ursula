@@ -13,6 +13,7 @@ public:
     uint64_t append(const Record& record);
 
 private:
+    std::mutex mutex_;
     std::map<uint64_t, std::unique_ptr<LogSegment>>& segments_;
     std::string partition_path_;
     uint64_t next_offset_ = 0;

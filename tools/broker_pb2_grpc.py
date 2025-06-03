@@ -54,6 +54,16 @@ class BrokerServiceStub(object):
                 request_serializer=broker__pb2.GetCommittedOffsetRequest.SerializeToString,
                 response_deserializer=broker__pb2.CommittedOffsetResponse.FromString,
                 _registered_method=True)
+        self.ConsumeStream = channel.unary_stream(
+                '/broker.BrokerService/ConsumeStream',
+                request_serializer=broker__pb2.ConsumeRequest.SerializeToString,
+                response_deserializer=broker__pb2.ConsumeResponse.FromString,
+                _registered_method=True)
+        self.Subscribe = channel.unary_unary(
+                '/broker.BrokerService/Subscribe',
+                request_serializer=broker__pb2.SubscribeRequest.SerializeToString,
+                response_deserializer=broker__pb2.Empty.FromString,
+                _registered_method=True)
 
 
 class BrokerServiceServicer(object):
@@ -83,6 +93,18 @@ class BrokerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ConsumeStream(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Subscribe(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_BrokerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -105,6 +127,16 @@ def add_BrokerServiceServicer_to_server(servicer, server):
                     servicer.GetCommittedOffset,
                     request_deserializer=broker__pb2.GetCommittedOffsetRequest.FromString,
                     response_serializer=broker__pb2.CommittedOffsetResponse.SerializeToString,
+            ),
+            'ConsumeStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.ConsumeStream,
+                    request_deserializer=broker__pb2.ConsumeRequest.FromString,
+                    response_serializer=broker__pb2.ConsumeResponse.SerializeToString,
+            ),
+            'Subscribe': grpc.unary_unary_rpc_method_handler(
+                    servicer.Subscribe,
+                    request_deserializer=broker__pb2.SubscribeRequest.FromString,
+                    response_serializer=broker__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -215,6 +247,60 @@ class BrokerService(object):
             '/broker.BrokerService/GetCommittedOffset',
             broker__pb2.GetCommittedOffsetRequest.SerializeToString,
             broker__pb2.CommittedOffsetResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ConsumeStream(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/broker.BrokerService/ConsumeStream',
+            broker__pb2.ConsumeRequest.SerializeToString,
+            broker__pb2.ConsumeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Subscribe(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/broker.BrokerService/Subscribe',
+            broker__pb2.SubscribeRequest.SerializeToString,
+            broker__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,

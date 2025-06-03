@@ -1,7 +1,8 @@
 #pragma once
 #include <memory>
 
-class Broker;
 
-//void run_grpc_server(Broker& broker);
-void run_grpc_server(std::shared_ptr<Broker> broker);
+class Broker;
+class ConsumerGroupManager;
+
+void run_grpc_server(std::shared_ptr<Broker> broker, std::shared_ptr<ConsumerGroupManager> consumer_group_manager);

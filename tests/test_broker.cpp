@@ -3,12 +3,14 @@
 #include <filesystem>
 #include "record/record.h"
 #include "spdlog/spdlog.h"
+#include "offset_store/mock_offset_store.h"
 
 TEST_CASE("Broker basic produce and consume") {
     std::string test_dir = "./test_broker_data";
     std::filesystem::remove_all(test_dir);
 
-    Broker broker(test_dir);
+    auto offset_store = std::make_unique<MockOffsetStore>();
+    Broker broker(test_dir, 5, std::move(offset_store));
     uint32_t pid = 0;
 
     std::vector<uint8_t> msg = {'h', 'e', 'l', 'l', 'o'};

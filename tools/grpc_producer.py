@@ -12,7 +12,7 @@ import broker_pb2
 import broker_pb2_grpc
 
 # ==== Configuration ====
-NUM_MESSAGES = 100
+NUM_MESSAGES = 10000
 PAYLOAD_SIZE = 256
 NUM_THREADS = 4
 NUM_TOPICS = 10
@@ -35,7 +35,7 @@ def random_key():
     return f"key_{random.randint(0, KEYSPACE_SIZE - 1)}"
 
 def produce_messages(thread_id, num_messages, stub, progress_bar):
-    for _ in range(num_messages):
+    for i in range(num_messages):
         topic = random_topic()
         key = random_key()
         payload = random_payload(PAYLOAD_SIZE)
