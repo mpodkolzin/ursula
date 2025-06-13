@@ -39,7 +39,7 @@ Topic::~Topic() {
 }
 
 uint64_t Topic::append(const std::string& key, const Record& record) {
-    spdlog::debug("Appending record to topic: {} key: {}", name_, key);
+    //spdlog::debug("Topic::append: Appending record to topic: {} key: {}", name_, key);
     uint32_t pid = hash_to_partition(key);
     return get_partition(pid).append(record);
 }
@@ -55,18 +55,18 @@ std::future<uint64_t> Topic::append_async(const std::string& key, const Record& 
 
 
 Record Topic::read(const std::string& key, uint64_t offset) {
-    spdlog::debug("Reading record from topic: {} key: {}", name_, key);
+    //spdlog::debug("Reading record from topic: {} key: {}", name_, key);
     uint32_t pid = hash_to_partition(key);
     return get_partition(pid).read(offset);
 }
 
 Record Topic::read(uint32_t partition_id, uint64_t offset) {
-    spdlog::debug("Reading record from topic: {} partition: {} offset: {}", name_, partition_id, offset);
+    //spdlog::debug("Reading record from topic: {} partition: {} offset: {}", name_, partition_id, offset);
     return get_partition(partition_id).read(offset);
 }
 
 uint32_t Topic::hash_to_partition(const std::string& key) const {
-    spdlog::debug("Hashing key: {} to partition", key);
+    //spdlog::debug("Topic::hash_to_partition: Hashing key: {} to partition", key);
     return std::hash<std::string>{}(key) % num_partitions_;
 }
 

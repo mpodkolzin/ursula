@@ -27,6 +27,7 @@ public:
 
 private:
     uint64_t base_offset_;
+    std::string path_;
     std::unique_ptr<FileHandle> log_file_raw_;
     std::unique_ptr<FileHandle> index_file_raw_;
     std::unique_ptr<BufferedWriter> log_writer_;
@@ -39,7 +40,7 @@ private:
     std::condition_variable flush_cv_;
     std::thread flush_thread_;
     bool running_ = true;
-    bool flush_requested_ = false;
+    std::atomic<bool> flush_requested_ = false;
 
     void flush_loop();
     static std::string log_file_name(const std::string& path);

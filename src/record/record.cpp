@@ -18,6 +18,21 @@ const std::vector<uint8_t>& Record::payload() const {
     return payload_;
 }
 
+//inline void Record::serialize_into(std::vector<uint8_t>& out) const {
+//    uint32_t payload_len = static_cast<uint32_t>(payload_.size());
+//    uint32_t crc = calculate_crc(payload_);
+//
+//    // Reserve in advance to reduce reallocation
+//    out.reserve(out.size() + sizeof(uint32_t) + sizeof(uint8_t) + sizeof(uint32_t) + payload_len + sizeof(uint32_t));
+//
+//    write_u32(out, MAGIC);
+//    write_u8(out, static_cast<uint8_t>(type_));
+//    write_u32(out, payload_len);
+//    out.insert(out.end(), payload_.begin(), payload_.end());
+//    write_u32(out, crc);
+//}
+
+
 std::vector<uint8_t> Record::serialize() const {
     std::vector<uint8_t> result;
 

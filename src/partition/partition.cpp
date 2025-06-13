@@ -9,6 +9,7 @@
 #include "record/record.h"
 #include "partition/partition.h"
 #include <cassert>
+#include <spdlog/spdlog.h>
 
 Partition::Partition(const std::string& path) : path_(path) {
     load_segments();
@@ -40,6 +41,7 @@ void Partition::load_segments() {
 
 uint64_t Partition::append(const Record& record) {
     assert(writer_);
+    //spdlog::debug("Partition::append: Appending record to partition: {}", path_);
     return writer_->append(record);
 }
 

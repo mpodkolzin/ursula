@@ -12,9 +12,10 @@ import broker_pb2
 import broker_pb2_grpc
 
 # ==== Configuration ====
-NUM_MESSAGES = 10000
+NUM_MESSAGES = 1000000
+
 PAYLOAD_SIZE = 256
-NUM_THREADS = 4
+NUM_THREADS = 10
 NUM_TOPICS = 10
 KEYSPACE_SIZE = 100
 GRPC_TARGET = 'localhost:50051'
@@ -42,11 +43,14 @@ def produce_messages(thread_id, num_messages, stub, progress_bar):
         request = broker_pb2.ProduceRequest(topic=topic, key=key, payload=payload)
 
         t0 = time.perf_counter()
+        #logging.info(f"[Thread-{thread_id}] Producing message {i+1}/{num_messages}")
         stub.Produce(request)
+        #logging.info(f"[Thread-{thread_id}] Produced message {i+1}/{num_messages}")
         t1 = time.perf_counter()
 
         latency_ms = (t1 - t0) * 1000
         with latencies_lock:
+            #logging.info(f"[Thread-{thread_id}] Produce latency: {latency_ms:.2f} ms")
             latencies.append(latency_ms)
             progress_bar.update(1)
 

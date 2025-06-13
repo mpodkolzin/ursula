@@ -4,6 +4,7 @@
 #include "partition/partition_writer.h"
 #include "partition/log_segment.h"
 #include "record/record.h"
+#include <spdlog/spdlog.h>
 
 PartitionWriter::PartitionWriter(std::map<uint64_t, std::unique_ptr<LogSegment>>& segments,
     const std::string& partition_path,
@@ -17,6 +18,7 @@ PartitionWriter::PartitionWriter(std::map<uint64_t, std::unique_ptr<LogSegment>>
 uint64_t PartitionWriter::append(const Record& record) {
     std::lock_guard<std::mutex> lock(mutex_);
     if (should_roll_segment()) {
+        spdlog::debug("PartitionWriter::append: Rolling segment");
         roll_segment();
     }
 

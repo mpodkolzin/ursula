@@ -5,18 +5,32 @@
 #include <cstdint>
 #include <mutex>
 #include <cstring>
+#include <spdlog/spdlog.h>
 
 BufferedWriter::BufferedWriter(FileHandle& file, size_t buffer_capacity)
-    : file_(file), buffer_(), buffer_capacity_(buffer_capacity), written_offset_(file_.seek(0, SEEK_CUR)) {
-    buffer_.reserve(buffer_capacity_);
+: file_(file), buffer_capacity_(buffer_capacity), written_offset_(file_.seek(0, SEEK_CUR)) {
+buffer_.reserve(buffer_capacity_);
 }
 
 void BufferedWriter::write(const std::vector<uint8_t>& data) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (buffer_.size() + data.size() > buffer_capacity_) {
-        flush();
+    bool needs_flush = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        spdlog::trace("BufferedWriter::write: Acquired lock");
+
+        if (buffer_.size() + data.size() > buffer_capacity_) {
+            needs_flush = true;
+        } else {
+            buffer_.insert(buffer_.end(), data.begin(), data.end());
+        }
     }
-    buffer_.insert(buffer_.end(), data.begin(), data.end());
+
+    if (needs_flush) {
+        flush();
+        // Retry after flush
+        std::lock_guard<std::mutex> lock(mutex_);
+        buffer_.insert(buffer_.end(), data.begin(), data.end());
+    }
 }
 
 void BufferedWriter::write_u32(uint32_t value) {
@@ -29,14 +43,24 @@ void BufferedWriter::write_u32(uint32_t value) {
 }
 
 void BufferedWriter::flush() {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!buffer_.empty()) {
-        ssize_t written = file_.write(buffer_.data(), buffer_.size());
-        if (written != static_cast<ssize_t>(buffer_.size())) {
-            throw std::runtime_error("Failed to write full buffer to file");
-        }
+    std::vector<uint8_t> temp;
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (buffer_.empty()) return;
+        spdlog::trace("BufferedWriter::flush: Moving buffer for flush");
+        temp.swap(buffer_);  // Efficient swap
+    }
+
+    spdlog::trace("BufferedWriter::flush: Writing to file");
+    ssize_t written = file_.write(temp.data(), temp.size());
+    if (written != static_cast<ssize_t>(temp.size())) {
+        throw std::runtime_error("Failed to write full buffer to file");
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
         written_offset_ += written;
-        buffer_.clear();
     }
 }
 
@@ -45,11 +69,7 @@ size_t BufferedWriter::current_offset() const {
     return written_offset_ + buffer_.size();
 }
 
-
 void BufferedWriter::write_bytes(const uint8_t* data, size_t size) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (buffer_.size() + size > buffer_capacity_) {
-        flush();
-    }
-    buffer_.insert(buffer_.end(), data, data + size);
+    std::vector<uint8_t> vec(data, data + size);
+    write(vec);  // Reuse logic
 }
